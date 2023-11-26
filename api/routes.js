@@ -56,7 +56,14 @@ router.get("/barcodes", async (req, res) => {
         return true;
       })
       .filter((res) => {
-        const expirationDate = new Date(res.expired_at);
+        const offSet = -420;
+
+        const epochExpirationDate = new Date(res.expired_at).getTime();
+
+        const expirationDate =
+          process.env.NODE_ENV === "development"
+            ? epochExpirationDate
+            : Math.floor((epochExpirationDate + offSet * 60000) / 1000) * 1000;
 
         if (expiryStartTime && !expiryEndTime) {
           return expirationDate >= expiryStartTime;
