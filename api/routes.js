@@ -38,6 +38,7 @@ router.get("/barcodes", async (req, res) => {
     const parseDate = (dateString) =>
       dateString ? new Date(parseInt(dateString)) : undefined;
 
+    const barcodeId = req.query.barcodeId;
     const expiryStartTime = parseDate(req.query.expiryStartTime);
     const expiryEndTime = parseDate(req.query.expiryEndTime);
 
@@ -48,6 +49,12 @@ router.get("/barcodes", async (req, res) => {
         created_at,
         expired_at,
       }))
+      .filter((res) => {
+        if (!!barcodeId) {
+          return res.barcode === barcodeId;
+        }
+        return true;
+      })
       .filter((res) => {
         const expirationDate = new Date(res.expired_at);
 
@@ -69,33 +76,6 @@ router.get("/barcodes", async (req, res) => {
       });
 
     res.json(filteredResponse);
-  }
-});
-
-router.get("/barcodes/:id", async (req, res) => {
-  const googleSheetClient = await sheet._getGoogleSheetClient();
-  const existingData = await sheet._readGoogleSheet(
-    googleSheetClient,
-    sheetId,
-    tabName,
-    range
-  );
-  const barcodeReq = req.params.id;
-  const foundBarcode = existingData.find((row) => row[0] === barcodeReq);
-
-  if (!foundBarcode) {
-    return res.status(400).send({
-      code: 200,
-      barcode: undefined,
-      message: "Barcode not found",
-    });
-  } else {
-    return res.json({
-      code: 200,
-      barcode: foundBarcode[0],
-      created_at: foundBarcode[1],
-      isExpired: new Date() >= new Date(foundBarcode[2]),
-    });
   }
 });
 

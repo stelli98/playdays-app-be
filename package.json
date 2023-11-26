@@ -6,7 +6,8 @@
   "scripts": {
     "start": "NODE_ENV=development node ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "vercel-build": "echo hello"
+    "vercel-build": "echo hello",
+    "deploy": "vercel --prod"
   },
   "author": "",
   "license": "ISC",
