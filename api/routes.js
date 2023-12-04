@@ -35,12 +35,19 @@ router.get("/barcodes", async (req, res) => {
       status: "Error",
     });
   } else {
-    const parseDate = (dateString) =>
-      dateString ? new Date(parseInt(dateString)) : undefined;
+    const convertDateToMMDDYYYY = (dateString) => {
+      const [date, time] = dateString.split(" ");
+      const [day, month, year] = date.split("/");
+
+      return new Date(`${month}/${day}/${year} ${time}`).getTime();
+    };
 
     const barcodeId = req.query.barcodeId;
-    const expiryStartTime = parseDate(req.query.expiryStartTime);
-    const expiryEndTime = parseDate(req.query.expiryEndTime);
+    const { expiryStartTime, expiryEndTime } = req.query;
+
+    if (expiryStartTime >= expiryEndTime) {
+      return res.json([]);
+    }
 
     const filteredResponse = data
       .slice(1)
@@ -58,7 +65,7 @@ router.get("/barcodes", async (req, res) => {
       .filter((res) => {
         const offSet = -420;
 
-        const epochExpirationDate = new Date(res.expired_at).getTime();
+        const epochExpirationDate = convertDateToMMDDYYYY(res.expired_at);
 
         const expirationDate =
           process.env.NODE_ENV === "development"
